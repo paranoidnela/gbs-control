@@ -1,7 +1,7 @@
 #!/bin/bash
-END=$(sed -n 1p /home/$USER/gbs-controlsettings/defaults/end)
+END=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/end)
 while [ "$END" == "false" ]; do
-  END=$(sed -n 1p /home/$USER/gbs-controlsettings/defaults/end)
+  END=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/end)
   REVISION=$(cat /proc/cpuinfo | grep Revision)
   LEN=${#REVISION}
   POS=$((LEN -4))
@@ -11,13 +11,13 @@ if [ "$REV" = "Beta" ] || [ "$REV" = "0002" ] || [ "$REV" = "0003" ]; then
   else
     I2C_PORT=$((1))
   fi
-  SETTING=$(sed -n 1p /home/$USER/gbs-controlsettings/defaults/current.dei)
-  RUNNING=$(sed -n 1p /home/$USER/gbs-controlsettings/defaults/running)
+  SETTING=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/current.dei)
+  RUNNING=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/running)
   # Pull in new Settings
-  OFFSET=$(( $(sed -n 2p /home/$USER/gbs-controlsettings/defaults/current.dei) ))
-  DETECT_SCAN=$(sed -n 3p /home/$USER/gbs-controlsettings/defaults/current.dei)
-  DETECT_LINES=$(( $(sed -n 4p /home/$USER/gbs-controlsettings/defaults/current.dei) ))
-  NORMAL_SCAN=$(sed -n 5p /home/$USER/gbs-controlsettings/defaults/current.dei)
+  OFFSET=$(( $(sed -n 2p /home/$USER/gbs-control/settings/defaults/current.dei) ))
+  DETECT_SCAN=$(sed -n 3p /home/$USER/gbs-control/settings/defaults/current.dei)
+  DETECT_LINES=$(( $(sed -n 4p /home/$USER/gbs-control/settings/defaults/current.dei) ))
+  NORMAL_SCAN=$(sed -n 5p /home/$USER/gbs-control/settings/defaults/current.dei)
   if [ "$DETECT_SCAN" == "interlaced" ]; then
     # Match is interlaced, Mismatch is progressive
     MATCH=$((0x01))
@@ -29,23 +29,23 @@ if [ "$REV" = "Beta" ] || [ "$REV" = "0002" ] || [ "$REV" = "0003" ]; then
   fi
   TEST=$(( -1 ))
   
-  LOW=$(sed -n '771p' /home/$USER/gbs-controlsettings/defaults/current.set)
-  MED=$(sed -n '772p' /home/$USER/gbs-controlsettings/defaults/current.set)
+  LOW=$(sed -n '771p' /home/$USER/gbs-control/settings/defaults/current.set)
+  MED=$(sed -n '772p' /home/$USER/gbs-control/settings/defaults/current.set)
   VDS_VRST=$(( (($MED & 0x7f) << 4) + ($LOW >> 4) ))
 
   #Process Running Loop
   while [ "$RUNNING" == "true" ] && [ "$SETTING" == "true" ] && [ "$END" == "false" ]; do
-	  SETTING=$(sed -n 1p /home/$USER/gbs-controlsettings/defaults/current.dei)
-    RUNNING=$(sed -n 1p /home/$USER/gbs-controlsettings/defaults/running)
-    END=$(sed -n 1p /home/$USER/gbs-controlsettings/defaults/end)
+	  SETTING=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/current.dei)
+    RUNNING=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/running)
+    END=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/end)
     
-    LOW=$(( $(sed -n '776p' /home/$USER/gbs-controlsettings/defaults/current.set) ))
-    MED=$(( $(sed -n '777p' /home/$USER/gbs-controlsettings/defaults/current.set) ))
-    HIGH=$(( $(sed -n '778p' /home/$USER/gbs-controlsettings/defaults/current.set) ))
+    LOW=$(( $(sed -n '776p' /home/$USER/gbs-control/settings/defaults/current.set) ))
+    MED=$(( $(sed -n '777p' /home/$USER/gbs-control/settings/defaults/current.set) ))
+    HIGH=$(( $(sed -n '778p' /home/$USER/gbs-control/settings/defaults/current.set) ))
     VDS_VTOP=$(( ( ($MED & 0x07) << 8) + $LOW ))
     VDS_VBOTTOM=$(( ( ($HIGH & 0x7f) << 4) + ($MED >> 4) ))
     
-    IF_VPOS=$(( $(sed -n 287p /home/$USER/gbs-controlsettings/defaults/current.set) ))
+    IF_VPOS=$(( $(sed -n 287p /home/$USER/gbs-control/settings/defaults/current.set) ))
     IF_VOFFSET=$(($OFFSET))
     if [ $(( $IF_VPOS + $OFFSET )) -lt $((0)) ]; then
       IF_VOFFSET=$((-1 * $IF_VPOS))

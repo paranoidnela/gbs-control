@@ -106,10 +106,10 @@ do_deinterlace_offset() {
 }
 
 do_deinterlace_detection() {
-  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-controlsettings/defaults/current.set
+  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-control/settings/defaults/current.set
   i2cset -y $I2C_PORT 0x17 0xf0 0x00
   VLINES=$(( (($(i2cget -y $I2C_PORT 0x17 0x08) & 0x0F ) << 7) + ($(i2cget -y $I2C_PORT 0x17 0x07) >> 1) ))
-  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-controlsettings/defaults/pi.set
+  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-control/settings/defaults/pi.set
   CURRENT_VALUE=$(sed -n 3p settings/defaults/current.dei)
   if [ "$CURRENT_VALUE" == "interlaced" ]; then
     DEFAULT_NO="--defaultno"
@@ -929,7 +929,7 @@ do_load() {
 #
 #
 do_finish() {
-  sed -i 1c\\true /home/$USER/gbs-controlsettings/defaults/end
+  sed -i 1c\\true /home/$USER/gbs-control/settings/defaults/end
   exit 0
 }
 
@@ -940,9 +940,9 @@ do_finish() {
 calc_wt_size
 detect_revision
 # Start / Reset "adaptive_deinterlace.sh"
-sed -i 1c\\true /home/$USER/gbs-controlsettings/defaults/end
+sed -i 1c\\true /home/$USER/gbs-control/settings/defaults/end
 sleep 0.25
-sed -i 1c\\false /home/$USER/gbs-controlsettings/defaults/end
+sed -i 1c\\false /home/$USER/gbs-control/settings/defaults/end
 sleep 0.25
 bash adaptive_deinterlace.sh > /dev/null 2>&1 &
 while true; do
@@ -977,6 +977,6 @@ while true; do
     esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
   else
     exit 1
-    sed -i 1c\\true /home/$USER/gbs-controlsettings/defaults/end
+    sed -i 1c\\true /home/$USER/gbs-control/settings/defaults/end
   fi
 done

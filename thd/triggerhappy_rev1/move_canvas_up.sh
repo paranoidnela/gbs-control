@@ -13,14 +13,14 @@ then
     TOP_VALUE=$(($VRST_VALUE -1 ))
 fi
 # File adjust
-MED=$(sed -n '777p' /home/$USER/gbs-controlsettings/defaults/current.set)
-HIGH=$(sed -n '778p' /home/$USER/gbs-controlsettings/defaults/current.set)
+MED=$(sed -n '777p' /home/$USER/gbs-control/settings/defaults/current.set)
+HIGH=$(sed -n '778p' /home/$USER/gbs-control/settings/defaults/current.set)
 LOW=$((TOP_VALUE & 0xff))
 MED=$(( ((BOTTOM_VALUE & 0x00F) << 4) + ((TOP_VALUE >> 8) & 0x07) + ($MED & 0x08) ))
 HIGH=$(( ((BOTTOM_VALUE >> 4) & 0x7f) + ($HIGH & 0x80) ))
-sed -i 776c\\$LOW /home/$USER/gbs-controlsettings/defaults/current.set
-sed -i 777c\\$MED /home/$USER/gbs-controlsettings/defaults/current.set
-sed -i 778c\\$HIGH /home/$USER/gbs-controlsettings/defaults/current.set
+sed -i 776c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+sed -i 777c\\$MED /home/$USER/gbs-control/settings/defaults/current.set
+sed -i 778c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
 # Register adjust
 i2cset -r -y -m 0x07 0 0x17 0x08 $((TOP_VALUE >> 8))
 i2cset -r -y -m 0xff 0 0x17 0x07 $((TOP_VALUE & 0xFF))

@@ -16,9 +16,9 @@ fi
 LOW=$((LEFT_VALUE & 0xff))
 MED=$(( ((RIGHT_VALUE & 0x00F) << 4) + (LEFT_VALUE >> 8) ))
 HIGH=$(( RIGHT_VALUE >> 4 ))
-sed -i 773c\\$LOW /home/$USER/gbs-controlsettings/defaults/current.set
-sed -i 774c\\$MED /home/$USER/gbs-controlsettings/defaults/current.set
-sed -i 775c\\$HIGH /home/$USER/gbs-controlsettings/defaults/current.set
+sed -i 773c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+sed -i 774c\\$MED /home/$USER/gbs-control/settings/defaults/current.set
+sed -i 775c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
 # Register adjust
 i2cset -r -y -m 0x0f 0 0x17 0x05 $((LEFT_VALUE >> 8))
 i2cset -r -y -m 0xff 0 0x17 0x04 $((LEFT_VALUE & 0xFF))

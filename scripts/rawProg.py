@@ -18,7 +18,7 @@ for line in lines:
 
 Tiva = Adafruit_I2C(address=0x17)
 
-for z in range(0, (len(start)/2) - 1520):
+for z in range(0, (len(start) // 2) - 1520):
     Tiva.write8(start[z*2], start[(z*2)+1]) 
     time.sleep(0.01)
 
