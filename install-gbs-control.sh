@@ -29,7 +29,9 @@ sudo usermod -aG i2c $USER
 
 # Patch /etc/default/triggerhappy to use current user
 echo -e "\nApply patch to /etc/default/triggerhappy to use current user"
-sudo sed -i 's/DAEMON_OPTS=.*$/DAEMON_OPTS="--user '$USER'"/' /etc/default/triggerhappy
+sudo sed -i 's/^.*DAEMON_OPTS=.*$/DAEMON_OPTS="--user '$USER'"/' /etc/default/triggerhappy
+# This is necessary because of a "bug" where the defaults config gets ignored, it might cause issues in the future
+sudo sed -i 's/^.*--user.*$/ExecStart=\/usr\/sbin\/thd --triggers \/etc\/triggerhappy\/triggers.d\/ --socket \/run\/thd.socket --user '$USER' --deviceglob \/dev\/input\/event*/' /lib/systemd/system/triggerhappy.service
 
 # Check Raspberry PI Revision to move triggerhappy files to /etc/triggerhappy/triggers.d and patch scripts correctly
 echo -e "\nCopy triggerhappy hotkey conf files:"
@@ -39,16 +41,19 @@ POS=$((LEN -4))
 REV=${REVISION:POS}
 if [ "$REV" = "Beta" ] || [ "$REV" = "0002" ] || [ "$REV" = "0003" ]; then
     echo -e "Revision 1 detected"
-	sudo cp thd/triggerhappy_rev1/* /etc/triggerhappy/triggers.d/
+	sudo cp $DIR/thd/triggerhappy_rev1/* /etc/triggerhappy/triggers.d/
 	sed -i 's/    self.bus = smbus.SMBus(1)/    self.bus = smbus.SMBus(0)/' $DIR/scripts/Adafruit_I2C.py
 else
     echo -e "Revision 2 detected"
-	sudo cp thd/triggerhappy/* /etc/triggerhappy/triggers.d/
+	sudo cp $DIR/thd/triggerhappy/* /etc/triggerhappy/triggers.d/
 fi
+sudo systemctl enable triggerhappy
+echo $USER > installeduser
+sudo mv installeduser /installeduser
 
 # Add required scripts for automatic start-up.
 echo -e "\nApply patch to .profile for bootup scripts:"
-patch -bN -F 6 $DIR/.profile $DIR/scripts/patch.profile
+patch -bN -F 6 $HOME/.profile $DIR/scripts/patch.profile
 
 # Replace config.txt to ensure booting with composite.
 echo -e "\nReplace /boot/config.txt for Luma output settings:"
