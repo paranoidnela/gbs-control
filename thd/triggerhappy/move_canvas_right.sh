@@ -16,9 +16,9 @@ fi
 LOW=$((LEFT_VALUE & 0xff))
 MED=$(( ((RIGHT_VALUE & 0x00F) << 4) + (LEFT_VALUE >> 8) ))
 HIGH=$(( RIGHT_VALUE >> 4 ))
-sed -i 773c\\$LOW /home/pi/settings/defaults/current.set
-sed -i 774c\\$MED /home/pi/settings/defaults/current.set
-sed -i 775c\\$HIGH /home/pi/settings/defaults/current.set
+sed -i 773c\\$LOW /home/$USER/settings/defaults/current.set
+sed -i 774c\\$MED /home/$USER/settings/defaults/current.set
+sed -i 775c\\$HIGH /home/$USER/settings/defaults/current.set
 # Register adjust
 sudo i2cset -r -y -m 0x0f 1 0x17 0x05 $((LEFT_VALUE >> 8))
 sudo i2cset -r -y -m 0xff 1 0x17 0x04 $((LEFT_VALUE & 0xFF))

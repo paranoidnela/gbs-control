@@ -20,9 +20,9 @@ if __name__ == '__main__':
         for x in range(0, 16):
             bank = Tiva.readList(x*16, 16)
             for z in range(0,16):
-                print bank[z]
+                print(bank[z])
                 
         #print "\n"
     
   except:
-    print "Error accessing default I2C bus"
+    print("Error accessing default I2C bus")

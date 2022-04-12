@@ -1,23 +1,23 @@
 #!/bin/bash
-END=$(sed -n 1p /home/pi/settings/defaults/end)
+END=$(sed -n 1p /home/$USER/settings/defaults/end)
 while [ "$END" == "false" ]; do
-  END=$(sed -n 1p /home/pi/settings/defaults/end)
-  REVISION=$(cat /proc/cpuinfo | grep revision)
+  END=$(sed -n 1p /home/$USER/settings/defaults/end)
+  REVISION=$(cat /proc/cpuinfo | grep Revision)
   LEN=${#REVISION}
-  POS=$((LEN -1))
+  POS=$((LEN -4))
   REV=${REVISION:POS}
-  if [ "$REV" = "0" ] || [ "$REV" = "1" ]; then
+if [ "$REV" = "Beta" ] || [ "$REV" = "0002" ] || [ "$REV" = "0003" ]; then
     I2C_PORT=$((0))
   else
     I2C_PORT=$((1))
   fi
-  SETTING=$(sed -n 1p /home/pi/settings/defaults/current.dei)
-  RUNNING=$(sed -n 1p /home/pi/settings/defaults/running)
+  SETTING=$(sed -n 1p /home/$USER/settings/defaults/current.dei)
+  RUNNING=$(sed -n 1p /home/$USER/settings/defaults/running)
   # Pull in new Settings
-  OFFSET=$(( $(sed -n 2p /home/pi/settings/defaults/current.dei) ))
-  DETECT_SCAN=$(sed -n 3p /home/pi/settings/defaults/current.dei)
-  DETECT_LINES=$(( $(sed -n 4p /home/pi/settings/defaults/current.dei) ))
-  NORMAL_SCAN=$(sed -n 5p /home/pi/settings/defaults/current.dei)
+  OFFSET=$(( $(sed -n 2p /home/$USER/settings/defaults/current.dei) ))
+  DETECT_SCAN=$(sed -n 3p /home/$USER/settings/defaults/current.dei)
+  DETECT_LINES=$(( $(sed -n 4p /home/$USER/settings/defaults/current.dei) ))
+  NORMAL_SCAN=$(sed -n 5p /home/$USER/settings/defaults/current.dei)
   if [ "$DETECT_SCAN" == "interlaced" ]; then
     # Match is interlaced, Mismatch is progressive
     MATCH=$((0x01))
@@ -29,23 +29,23 @@ while [ "$END" == "false" ]; do
   fi
   TEST=$(( -1 ))
   
-  LOW=$(sed -n '771p' /home/pi/settings/defaults/current.set)
-  MED=$(sed -n '772p' /home/pi/settings/defaults/current.set)
+  LOW=$(sed -n '771p' /home/$USER/settings/defaults/current.set)
+  MED=$(sed -n '772p' /home/$USER/settings/defaults/current.set)
   VDS_VRST=$(( (($MED & 0x7f) << 4) + ($LOW >> 4) ))
 
   #Process Running Loop
   while [ "$RUNNING" == "true" ] && [ "$SETTING" == "true" ] && [ "$END" == "false" ]; do
-	  SETTING=$(sed -n 1p /home/pi/settings/defaults/current.dei)
-    RUNNING=$(sed -n 1p /home/pi/settings/defaults/running)
-    END=$(sed -n 1p /home/pi/settings/defaults/end)
+	  SETTING=$(sed -n 1p /home/$USER/settings/defaults/current.dei)
+    RUNNING=$(sed -n 1p /home/$USER/settings/defaults/running)
+    END=$(sed -n 1p /home/$USER/settings/defaults/end)
     
-    LOW=$(( $(sed -n '776p' /home/pi/settings/defaults/current.set) ))
-    MED=$(( $(sed -n '777p' /home/pi/settings/defaults/current.set) ))
-    HIGH=$(( $(sed -n '778p' /home/pi/settings/defaults/current.set) ))
+    LOW=$(( $(sed -n '776p' /home/$USER/settings/defaults/current.set) ))
+    MED=$(( $(sed -n '777p' /home/$USER/settings/defaults/current.set) ))
+    HIGH=$(( $(sed -n '778p' /home/$USER/settings/defaults/current.set) ))
     VDS_VTOP=$(( ( ($MED & 0x07) << 8) + $LOW ))
     VDS_VBOTTOM=$(( ( ($HIGH & 0x7f) << 4) + ($MED >> 4) ))
     
-    IF_VPOS=$(( $(sed -n 287p /home/pi/settings/defaults/current.set) ))
+    IF_VPOS=$(( $(sed -n 287p /home/$USER/settings/defaults/current.set) ))
     IF_VOFFSET=$(($OFFSET))
     if [ $(( $IF_VPOS + $OFFSET )) -lt $((0)) ]; then
       IF_VOFFSET=$((-1 * $IF_VPOS))

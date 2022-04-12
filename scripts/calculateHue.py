@@ -10,4 +10,4 @@ if Ucos == 0:
         Hue = 90
 else:
     Hue = int(math.trunc( round( (180/math.pi) * math.atan(Usin/Ucos), 0) ))
-print Hue
+print(Hue)

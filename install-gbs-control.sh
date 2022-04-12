@@ -7,12 +7,12 @@ echo -e "\nInstall location is: "$DIR
 # Update sources and install I2C components.
 echo -e "\nUpdating sources & installing i2c utils:"
 sudo apt-get update
-sudo apt-get install -y i2c-tools libi2c-dev python-smbus
+sudo apt-get install -y i2c-tools libi2c-dev python3-smbus
 
 # Get latest stable version from GitHub
 echo -e "\nDownloading current master version:"
 cd $DIR
-wget https://raw.githubusercontent.com/dooklink/gbs-control/master/gbs-control.zip
+wget https://raw.githubusercontent.com/paranoidbashthot/gbs-control/master/gbs-control.zip
 
 # Unpack scripts & default settings
 echo -e "\nUnpacking zip package:"
@@ -38,11 +38,11 @@ sudo patch -bN -F 6 /etc/default/triggerhappy $DIR/scripts/patch.triggerhappy
 
 # Move triggerhappy files to /etc/triggerhappy/triggers.d
 echo -e "\nCopy triggerhappy hotkey conf files:"
-REVISION=$(cat /proc/cpuinfo | grep revision)
+REVISION=$(cat /proc/cpuinfo | grep Revision)
 LEN=${#REVISION}
-POS=$((LEN -1))
+POS=$((LEN -4))
 REV=${REVISION:POS}
-if [ "$REV" = "0" ] || [ "$REV" = "1" ]; then
+if [ "$REV" = "Beta" ] || [ "$REV" = "0002" ] || [ "$REV" = "0003" ]; then
     echo -e "Revision 1 detected"
 	sudo cp thd/triggerhappy_rev1/* /etc/triggerhappy/triggers.d/
 else

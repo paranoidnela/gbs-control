@@ -32,11 +32,11 @@ calc_wt_size() {
 }
 
 detect_revision() {
-  REVISION=$(cat /proc/cpuinfo | grep revision)
+  REVISION=$(cat /proc/cpuinfo | grep Revision)
   LEN=${#REVISION}
-  POS=$((LEN -1))
+  POS=$((LEN -4))
   REV=${REVISION:POS}
-  if [ "$REV" = "0" ] || [ "$REV" = "1" ]; then
+if [ "$REV" = "Beta" ] || [ "$REV" = "0002" ] || [ "$REV" = "0003" ]; then
     I2C_PORT=$((0))
   else
     I2C_PORT=$((1))
@@ -106,10 +106,10 @@ do_deinterlace_offset() {
 }
 
 do_deinterlace_detection() {
-  sudo python /home/pi/scripts/regProg.py /home/pi/settings/defaults/current.set
+  sudo python /home/$USER/scripts/regProg.py /home/$USER/settings/defaults/current.set
   sudo i2cset -y $I2C_PORT 0x17 0xf0 0x00
   VLINES=$(( (($(sudo i2cget -y $I2C_PORT 0x17 0x08) & 0x0F ) << 7) + ($(sudo i2cget -y $I2C_PORT 0x17 0x07) >> 1) ))
-  sudo python /home/pi/scripts/regProg.py /home/pi/settings/defaults/pi.set
+  sudo python /home/$USER/scripts/regProg.py /home/$USER/settings/defaults/pi.set
   CURRENT_VALUE=$(sed -n 3p settings/defaults/current.dei)
   if [ "$CURRENT_VALUE" == "interlaced" ]; then
     DEFAULT_NO="--defaultno"
@@ -929,14 +929,14 @@ do_load() {
 #
 #
 do_finish() {
-  sed -i 1c\\true /home/pi/settings/defaults/end
+  sed -i 1c\\true /home/$USER/settings/defaults/end
   exit 0
 }
 
 # Everything needs to be run as root
 if [ $(id -u) -ne 0 ]; then
   printf "Script must be run as root. Try 'sudo bash gbs-config.sh'\n"
-  sed -i 1c\\true /home/pi/settings/defaults/end
+  sed -i 1c\\true /home/$USER/settings/defaults/end
   exit 1
 fi
 
@@ -946,9 +946,9 @@ fi
 calc_wt_size
 detect_revision
 # Start / Reset "adaptive_deinterlace.sh"
-sed -i 1c\\true /home/pi/settings/defaults/end
+sed -i 1c\\true /home/$USER/settings/defaults/end
 sleep 0.25
-sed -i 1c\\false /home/pi/settings/defaults/end
+sed -i 1c\\false /home/$USER/settings/defaults/end
 sleep 0.25
 bash adaptive_deinterlace.sh > /dev/null 2>&1 &
 while true; do
@@ -983,6 +983,6 @@ while true; do
     esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
   else
     exit 1
-    sed -i 1c\\true /home/pi/settings/defaults/end
+    sed -i 1c\\true /home/$USER/settings/defaults/end
   fi
 done

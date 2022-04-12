@@ -9,19 +9,15 @@ GBS8200, GBS8220, and maybe others in the future (HD Box Pro)
 =============
 INSTALL GUIDE
 
-The install script is designed to be used with a fresh vanilla Raspbian install.
-to install or update run the following command:
+The install script is designed to be used with a fresh vanilla Raspbian Lite install, the new Raspbian images require the user to create their own accounts on first boot, the user can be named anything you want.
+to install or update run the following command (I highly reccomend to take a look at the script before blindly executing it):
 
-curl https://raw.githubusercontent.com/dooklink/gbs-control/master/install-gbs-control.sh | bash
-
-or for the development version (not guaranteed to be working)
-
-curl https://raw.githubusercontent.com/dooklink/gbs-control/develop/install-gbs-control.sh | bash
+curl https://raw.githubusercontent.com/paranoidbashthot/gbs-control/master/install-gbs-control.sh | bash
 
 ===============
 Usage
 
-Raspberry pi will auto boot into the config menu displayed via the Green RCA Luma input on the GBS board from RPi composite output.
+Raspberry Pi will auto boot into the config menu displayed via the Green RCA Luma input on the GBS board from Raspberry Pi composite output.
 The Raspberry Pi must be connected to the I2C lines (SDA, SCL and GND), of the target board.
 Also, the P8 jumper on the GBS82xx boards must be shorted to ensure RPi can be I2C master without interference.
 Global keyboard hotkeys are preconfigured to switch between the Config Menu and the RGB Video Source.

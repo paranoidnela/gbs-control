@@ -32,7 +32,7 @@ if __name__ == '__main__':
             Tiva.writeList(z*16, bank)
             
   except:
-    print "Error accessing default I2C bus"
+    print("Error accessing default I2C bus")
 
 
 file.close()

@@ -1,2 +1,2 @@
 #!/bin/sh
-python /home/pi/scripts/regDump.py > /home/pi/settings/defaults/current.set
+python /home/$USER/scripts/regDump.py > /home/$USER/settings/defaults/current.set
