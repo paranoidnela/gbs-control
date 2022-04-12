@@ -1,7 +1,7 @@
 #!/bin/ash
 # Install script for Trueview 5725 control (GBS8200, GBS8220, HD9000, HD Box Pro etc)
 
-DIR=$HOME/
+DIR=$HOME"/gbs-control"
 echo -e "\nInstall location is: "$DIR
 
 # Update sources and install I2C components.
@@ -11,9 +11,8 @@ sudo apt-get install -y i2c-tools libi2c-dev python3-smbus git
 
 # Get latest stable version from GitHub
 echo -e "\nDownloading current master version:"
-cd $DIR
-git clone https://github.com/paranoidbashthot/gbs-control.git .
-# this is ulrasketch, soon will be replaced with a more proper solution
+cd $HOME
+git clone https://github.com/paranoidbashthot/gbs-control.git
 
 # Patch /etc/inittab to allow for automatic login.
 # and to use xterm-mono for B&W (monochrome) interactive terminal.
@@ -25,12 +24,13 @@ echo -e "\nApply patch to /etc/modules for kernal i2c modules:"
 sudo patch -bN -F 6 /etc/modules $DIR/scripts/patch.modules
 echo -e "\nApply patch to /etc/modprobe.d/raspi-blacklist.conf to allow i2c use:"
 sudo patch -bN -F 6 /etc/modprobe.d/raspi-blacklist.conf $DIR/scripts/patch.raspi-blacklist.conf
+sudo usermod -aG i2c $USER
 
-# Patch /etc/default/triggerhappy to use root user
-echo -e "\nApply patch to /etc/default/triggerhappy to use root"
-sudo patch -bN -F 6 /etc/default/triggerhappy $DIR/scripts/patch.triggerhappy
+# Patch /etc/default/triggerhappy to use current user
+echo -e "\nApply patch to /etc/default/triggerhappy to use current user"
+sudo sed -i 's/DAEMON_OPTS=.*$/DAEMON_OPTS="--user '$USER'"/' /etc/default/triggerhappy
 
-# Move triggerhappy files to /etc/triggerhappy/triggers.d
+# Check Raspberry PI Revision to move triggerhappy files to /etc/triggerhappy/triggers.d and patch scripts correctly
 echo -e "\nCopy triggerhappy hotkey conf files:"
 REVISION=$(cat /proc/cpuinfo | grep Revision)
 LEN=${#REVISION}
@@ -39,6 +39,7 @@ REV=${REVISION:POS}
 if [ "$REV" = "Beta" ] || [ "$REV" = "0002" ] || [ "$REV" = "0003" ]; then
     echo -e "Revision 1 detected"
 	sudo cp thd/triggerhappy_rev1/* /etc/triggerhappy/triggers.d/
+	sed -i 's/    self.bus = smbus.SMBus(1)/    self.bus = smbus.SMBus(0)/' $DIR/scripts/Adafruit_I2C.py
 else
     echo -e "Revision 2 detected"
 	sudo cp thd/triggerhappy/* /etc/triggerhappy/triggers.d/

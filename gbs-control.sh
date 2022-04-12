@@ -106,10 +106,10 @@ do_deinterlace_offset() {
 }
 
 do_deinterlace_detection() {
-  sudo python /home/$USER/scripts/regProg.py /home/$USER/settings/defaults/current.set
-  sudo i2cset -y $I2C_PORT 0x17 0xf0 0x00
-  VLINES=$(( (($(sudo i2cget -y $I2C_PORT 0x17 0x08) & 0x0F ) << 7) + ($(sudo i2cget -y $I2C_PORT 0x17 0x07) >> 1) ))
-  sudo python /home/$USER/scripts/regProg.py /home/$USER/settings/defaults/pi.set
+  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-controlsettings/defaults/current.set
+  i2cset -y $I2C_PORT 0x17 0xf0 0x00
+  VLINES=$(( (($(i2cget -y $I2C_PORT 0x17 0x08) & 0x0F ) << 7) + ($(i2cget -y $I2C_PORT 0x17 0x07) >> 1) ))
+  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-controlsettings/defaults/pi.set
   CURRENT_VALUE=$(sed -n 3p settings/defaults/current.dei)
   if [ "$CURRENT_VALUE" == "interlaced" ]; then
     DEFAULT_NO="--defaultno"
@@ -855,8 +855,8 @@ do_save() {
 
   NEW_VALUE=$(whiptail --inputbox "Enter Setting Name" 8 $WT_WIDTH "default" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sudo cp -f settings/defaults/current.set "settings/"$NEW_VALUE".set" >> log.txt 2>&1
-    sudo cp -f settings/defaults/current.dei "settings/deinterlace/"$NEW_VALUE".dei" >> log.txt 2>&1
+    cp -f settings/defaults/current.set "settings/"$NEW_VALUE".set" >> log.txt 2>&1
+    cp -f settings/defaults/current.dei "settings/deinterlace/"$NEW_VALUE".dei" >> log.txt 2>&1
   fi
 }
 
@@ -870,10 +870,10 @@ do_nag() {
   if [ $RET -eq 1 ]; then
     return 0
   elif [ $RET -eq 0 ]; then
-	sudo rm -f settings/$fileName >> log.txt 2>&1
+	rm -f settings/$fileName >> log.txt 2>&1
 	LEN=$(( ${#fileName} - 4))
 	fileName=${fileName:0:LEN}".dei"
-	sudo rm -f settings/deinterlace/$fileName >> log.txt 2>&1
+	rm -f settings/deinterlace/$fileName >> log.txt 2>&1
   fi
 }
 
@@ -918,10 +918,10 @@ do_load() {
     return 0
   elif [ $RET -eq 0 ]; then
     fileName=$(sed -n $FUN'p' settings/defaults/fileList.txt)
-	sudo cp -f settings/$fileName settings/defaults/current.set >> log.txt 2>&1
+	cp -f settings/$fileName settings/defaults/current.set >> log.txt 2>&1
 	LEN=$(( ${#fileName} - 4))
 	fileName=${fileName:0:LEN}".dei"
-	sudo cp -f settings/deinterlace/$fileName settings/defaults/current.dei >> log.txt 2>&1
+	cp -f settings/deinterlace/$fileName settings/defaults/current.dei >> log.txt 2>&1
   unset filesWhiptail
   fi
 }
@@ -929,16 +929,10 @@ do_load() {
 #
 #
 do_finish() {
-  sed -i 1c\\true /home/$USER/settings/defaults/end
+  sed -i 1c\\true /home/$USER/gbs-controlsettings/defaults/end
   exit 0
 }
 
-# Everything needs to be run as root
-if [ $(id -u) -ne 0 ]; then
-  printf "Script must be run as root. Try 'sudo bash gbs-config.sh'\n"
-  sed -i 1c\\true /home/$USER/settings/defaults/end
-  exit 1
-fi
 
 #
 # Interactive use loop
@@ -946,9 +940,9 @@ fi
 calc_wt_size
 detect_revision
 # Start / Reset "adaptive_deinterlace.sh"
-sed -i 1c\\true /home/$USER/settings/defaults/end
+sed -i 1c\\true /home/$USER/gbs-controlsettings/defaults/end
 sleep 0.25
-sed -i 1c\\false /home/$USER/settings/defaults/end
+sed -i 1c\\false /home/$USER/gbs-controlsettings/defaults/end
 sleep 0.25
 bash adaptive_deinterlace.sh > /dev/null 2>&1 &
 while true; do
@@ -983,6 +977,6 @@ while true; do
     esac || whiptail --msgbox "There was an error running option $FUN" 20 60 1
   else
     exit 1
-    sed -i 1c\\true /home/$USER/settings/defaults/end
+    sed -i 1c\\true /home/$USER/gbs-controlsettings/defaults/end
   fi
 done

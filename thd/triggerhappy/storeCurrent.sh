@@ -1,2 +1,2 @@
 #!/bin/sh
-python /home/$USER/scripts/regDump.py > /home/$USER/settings/defaults/current.set
+python /home/$USER/gbs-controlscripts/regDump.py > /home/$USER/gbs-controlsettings/defaults/current.set
