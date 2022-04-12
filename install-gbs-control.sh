@@ -12,6 +12,7 @@ sudo apt-get install -y i2c-tools libi2c-dev python3-smbus git
 # Get latest stable version from GitHub
 echo -e "\nDownloading current master version:"
 cd $HOME
+rm -r gbs-control
 git clone https://github.com/paranoidbashthot/gbs-control.git
 
 # Patch /etc/inittab to allow for automatic login.

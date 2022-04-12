@@ -80,7 +80,7 @@ CTRL+8 - Move image right" \
 #
 #
 do_deinterlace_enable() {
-  CURRENT_VALUE=$(sed -n 1p settings/defaults/current.dei)
+  CURRENT_VALUE=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/current.dei)
   if [ "$CURRENT_VALUE" == "false" ]; then
     DEFAULT_NO="--defaultno"
   else
@@ -90,27 +90,27 @@ do_deinterlace_enable() {
   RET=$?
   if [ $RET -eq 1 ]; then
     # NO / Disable Branch
-    sed -i 1c\\false settings/defaults/current.dei
+    sed -i 1c\\false /home/$USER/gbs-control/settings/defaults/current.dei
   elif [ $RET -eq 0 ]; then
     # YES / Enable Branch
-    sed -i 1c\\true settings/defaults/current.dei
+    sed -i 1c\\true /home/$USER/gbs-control/settings/defaults/current.dei
   fi
 }
 
 do_deinterlace_offset() {
-  CURRENT_VALUE=$(sed -n 2p settings/defaults/current.dei)
+  CURRENT_VALUE=$(sed -n 2p /home/$USER/gbs-control/settings/defaults/current.dei)
   NEW_VALUE=$(whiptail --inputbox "Enter Vertical Offset (+ve or -ve)" 20 60 -- "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sed -i 2c\\$NEW_VALUE settings/defaults/current.dei
+    sed -i 2c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.dei
   fi
 }
 
 do_deinterlace_detection() {
-  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-control/settings/defaults/current.set
+  python /home/$USER/gbs-control/scripts/regProg.py /home/$USER/gbs-control/settings/defaults/current.set
   i2cset -y $I2C_PORT 0x17 0xf0 0x00
   VLINES=$(( (($(i2cget -y $I2C_PORT 0x17 0x08) & 0x0F ) << 7) + ($(i2cget -y $I2C_PORT 0x17 0x07) >> 1) ))
-  python /home/$USER/gbs-controlscripts/regProg.py /home/$USER/gbs-control/settings/defaults/pi.set
-  CURRENT_VALUE=$(sed -n 3p settings/defaults/current.dei)
+  python /home/$USER/gbs-control/scripts/regProg.py /home/$USER/gbs-control/settings/defaults/pi.set
+  CURRENT_VALUE=$(sed -n 3p /home/$USER/gbs-control/settings/defaults/current.dei)
   if [ "$CURRENT_VALUE" == "interlaced" ]; then
     DEFAULT_NO="--defaultno"
   else
@@ -125,17 +125,17 @@ Is the current source Interlaced or Progressive?" \
   RET=$?
   if [ $RET -eq 1 ]; then
     # NO / Interlaced Branch
-    sed -i 3c\\interlaced settings/defaults/current.dei
-    sed -i 4c\\$VLINES settings/defaults/current.dei
+    sed -i 3c\\interlaced /home/$USER/gbs-control/settings/defaults/current.dei
+    sed -i 4c\\$VLINES /home/$USER/gbs-control/settings/defaults/current.dei
   elif [ $RET -eq 0 ]; then
     # YES / Progressive Branch
-    sed -i 3c\\progressive settings/defaults/current.dei
-    sed -i 4c\\$VLINES settings/defaults/current.dei
+    sed -i 3c\\progressive /home/$USER/gbs-control/settings/defaults/current.dei
+    sed -i 4c\\$VLINES /home/$USER/gbs-control/settings/defaults/current.dei
   fi
 }
 
 do_deinterlace_default() {
-  CURRENT_VALUE=$(sed -n 5p settings/defaults/current.dei)
+  CURRENT_VALUE=$(sed -n 5p /home/$USER/gbs-control/settings/defaults/current.dei)
   if [ "$CURRENT_VALUE" == "interlaced" ]; then
     DEFAULT_NO="--defaultno"
   else
@@ -150,10 +150,10 @@ Is the geometry set-up for Interlaced or Progressive?" \
   RET=$?
   if [ $RET -eq 1 ]; then
     # NO / Interlaced Branch
-    sed -i 5c\\interlaced settings/defaults/current.dei
+    sed -i 5c\\interlaced /home/$USER/gbs-control/settings/defaults/current.dei
   elif [ $RET -eq 0 ]; then
     # YES / Progressive Branch
-    sed -i 5c\\progressive settings/defaults/current.dei
+    sed -i 5c\\progressive /home/$USER/gbs-control/settings/defaults/current.dei
   fi
 }
 
@@ -177,15 +177,15 @@ the last active settings will be used." \
 
 do_deinterlace_menu() {
   while true; do
-    DEI_ENABLED=$(sed -n 1p settings/defaults/current.dei)
+    DEI_ENABLED=$(sed -n 1p /home/$USER/gbs-control/settings/defaults/current.dei)
     if [ "$DEI_ENABLED" == "false" ]; then
       DEI_ENABLED="Disabled"
     else
       DEI_ENABLED="Enabled"
     fi
-  DEI_OFFSET=$(sed -n 2p settings/defaults/current.dei)
-	DEI_DETECT=$(sed -n 4p settings/defaults/current.dei)" = "$(sed -n 3p settings/defaults/current.dei)
-  DEI_DEFAULT=$(sed -n 5p settings/defaults/current.dei)
+  DEI_OFFSET=$(sed -n 2p /home/$USER/gbs-control/settings/defaults/current.dei)
+	DEI_DETECT=$(sed -n 4p /home/$USER/gbs-control/settings/defaults/current.dei)" = "$(sed -n 3p /home/$USER/gbs-control/settings/defaults/current.dei)
+  DEI_DEFAULT=$(sed -n 5p /home/$USER/gbs-control/settings/defaults/current.dei)
     FUN=$(whiptail --title "Raspberry Pi GB8200 Controller v0.3" \
 	--menu "Dynamic De-interlace Settings" \
 	$WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT \
@@ -215,158 +215,158 @@ do_deinterlace_menu() {
 #
 #
 do_set_Vds_hb_st() {
-  LOW=$(sed -n 773p settings/defaults/current.set)
-  HIGH=$(sed -n 774p settings/defaults/current.set)
+  LOW=$(sed -n 773p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 774p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x0f) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter Hblank Start (0 - 4095)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x0f) + ($HIGH & 0xf0) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 773c\\$LOW settings/defaults/current.set
-	  sed -i 774c\\$HIGH settings/defaults/current.set
+    sed -i 773c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 774c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_hb_sp() {
-  LOW=$(sed -n '774p' settings/defaults/current.set)
-  HIGH=$(sed -n '775p' settings/defaults/current.set)
+  LOW=$(sed -n '774p' /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n '775p' /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( ($HIGH << 4) + ($LOW >> 4) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Hblank Stop (0 - 4095)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( NEW_VALUE >> 4 ))
 	  LOW=$(( ((NEW_VALUE << 4) & 0xf0) + ($LOW & 0x0f) ))
-    sed -i 774c\\$LOW settings/defaults/current.set
-	  sed -i 775c\\$HIGH settings/defaults/current.set
+    sed -i 774c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 775c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_vb_st() {
-  LOW=$(sed -n 776p settings/defaults/current.set)
-  HIGH=$(sed -n 777p settings/defaults/current.set)
+  LOW=$(sed -n 776p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 777p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x07) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter Vblank Start (0 - 2047)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x07) + ($HIGH & 0xf8) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 776c\\$LOW settings/defaults/current.set
-	  sed -i 777c\\$HIGH settings/defaults/current.set
+    sed -i 776c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 777c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_vb_sp() {
-  LOW=$(sed -n '777p' settings/defaults/current.set)
-  HIGH=$(sed -n '778p' settings/defaults/current.set)
+  LOW=$(sed -n '777p' /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n '778p' /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (($HIGH & 0x7f) << 4) + ($LOW >> 4) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Vblank Stop (0 - 2047)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 4) & 0x7f) + ($HIGH & 0x80) ))
 	  LOW=$(( ((NEW_VALUE << 4) & 0xf0) + ($LOW & 0x0f) ))
-    sed -i 777c\\$LOW settings/defaults/current.set
-	  sed -i 778c\\$HIGH settings/defaults/current.set
+    sed -i 777c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 778c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_hs_st() {
-  LOW=$(sed -n 779p settings/defaults/current.set)
-  HIGH=$(sed -n 780p settings/defaults/current.set)
+  LOW=$(sed -n 779p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 780p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x0f) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter Hsync Start (0 - 4095)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x0f) + ($HIGH & 0xf0) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 779c\\$LOW settings/defaults/current.set
-	  sed -i 780c\\$HIGH settings/defaults/current.set
+    sed -i 779c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 780c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_hs_sp() {
-  LOW=$(sed -n '780p' settings/defaults/current.set)
-  HIGH=$(sed -n '781p' settings/defaults/current.set)
+  LOW=$(sed -n '780p' /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n '781p' /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( ($HIGH << 4) + ($LOW >> 4) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Hsync Stop (0 - 4095)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( NEW_VALUE >> 4 ))
 	  LOW=$(( ((NEW_VALUE << 4) & 0xf0) + ($LOW & 0x0f) ))
-    sed -i 780c\\$LOW settings/defaults/current.set
-	  sed -i 781c\\$HIGH settings/defaults/current.set
+    sed -i 780c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 781c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_vs_st() {
-  LOW=$(sed -n 782p settings/defaults/current.set)
-  HIGH=$(sed -n 783p settings/defaults/current.set)
+  LOW=$(sed -n 782p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 783p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x07) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter Vsync Start (0 - 2047)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x07) + ($HIGH & 0xf8) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 782c\\$LOW settings/defaults/current.set
-	  sed -i 783c\\$HIGH settings/defaults/current.set
+    sed -i 782c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 783c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_vs_sp() {
-  LOW=$(sed -n '783p' settings/defaults/current.set)
-  HIGH=$(sed -n '784p' settings/defaults/current.set)
+  LOW=$(sed -n '783p' /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n '784p' /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (($HIGH & 0x7f) << 4) + ($LOW >> 4) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Vsync Stop (0 - 2047)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 4) & 0x7f) + ($HIGH & 0x80) ))
 	  LOW=$(( ((NEW_VALUE << 4) & 0xf0) + ($LOW & 0x0f) ))
-    sed -i 783c\\$LOW settings/defaults/current.set
-	  sed -i 784c\\$HIGH settings/defaults/current.set
+    sed -i 783c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 784c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_dis_hb_st() {
-  LOW=$(sed -n 785p settings/defaults/current.set)
-  HIGH=$(sed -n 786p settings/defaults/current.set)
+  LOW=$(sed -n 785p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 786p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x0f) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter Hblank Start (0 - 4095)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x0f) + ($HIGH & 0xf0) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 785c\\$LOW settings/defaults/current.set
-	  sed -i 786c\\$HIGH settings/defaults/current.set
+    sed -i 785c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 786c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_dis_hb_sp() {
-  LOW=$(sed -n '786p' settings/defaults/current.set)
-  HIGH=$(sed -n '787p' settings/defaults/current.set)
+  LOW=$(sed -n '786p' /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n '787p' /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( ($HIGH << 4) + ($LOW >> 4) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Hblank Stop (0 - 4095)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( NEW_VALUE >> 4 ))
 	  LOW=$(( ((NEW_VALUE << 4) & 0xf0) + ($LOW & 0x0f) ))
-    sed -i 786c\\$LOW settings/defaults/current.set
-	  sed -i 787c\\$HIGH settings/defaults/current.set
+    sed -i 786c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 787c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_dis_vb_st() {
-  LOW=$(sed -n 788p settings/defaults/current.set)
-  HIGH=$(sed -n 789p settings/defaults/current.set)
+  LOW=$(sed -n 788p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 789p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x07) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter Vblank Start (0 - 2047)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x07) + ($HIGH & 0xf8) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 788c\\$LOW settings/defaults/current.set
-	  sed -i 789c\\$HIGH settings/defaults/current.set
+    sed -i 788c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 789c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_dis_vb_sp() {
-  LOW=$(sed -n '789p' settings/defaults/current.set)
-  HIGH=$(sed -n '790p' settings/defaults/current.set)
+  LOW=$(sed -n '789p' /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n '790p' /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (($HIGH & 0x7f) << 4) + ($LOW >> 4) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Vblank Stop (0 - 2047)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 4) & 0x7f) + ($HIGH & 0x80) ))
 	  LOW=$(( ((NEW_VALUE << 4) & 0xf0) + ($LOW & 0x0f) ))
-    sed -i 789c\\$LOW settings/defaults/current.set
-	  sed -i 790c\\$HIGH settings/defaults/current.set
+    sed -i 789c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 790c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
@@ -412,18 +412,18 @@ do_output_geometry_menu() {
 #
 #
 do_set_Sp_pre_coast() {
-  CURRENT_VALUE=$(( $(sed -n '1337p' settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n '1337p' /home/$USER/gbs-control/settings/defaults/current.set) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Coast Start (0 - 255)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sed -i 1337c\\$NEW_VALUE settings/defaults/current.set
+    sed -i 1337c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Sp_post_coast() {
-  CURRENT_VALUE=$(( $(sed -n '1338p' settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n '1338p' /home/$USER/gbs-control/settings/defaults/current.set) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Coast Stop (0 - 255)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sed -i 1338c\\$NEW_VALUE settings/defaults/current.set
+    sed -i 1338c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
@@ -449,28 +449,28 @@ done
 #
 #
 do_set_Vds_vscale() {
-  LOW=$(sed -n '792p' settings/defaults/current.set)
-  HIGH=$(sed -n '793p' settings/defaults/current.set)
+  LOW=$(sed -n '792p' /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n '793p' /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (($HIGH & 0x7f) << 4) + ($LOW >> 4) ))
   NEW_VALUE=$(whiptail --inputbox "Enter V Scaling (0 - 1023)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 4) & 0x7f) + ($HIGH & 0x80) ))
 	  LOW=$(( ((NEW_VALUE << 4) & 0xf0) + ($LOW & 0x0f) ))
-    sed -i 792c\\$LOW settings/defaults/current.set
-	  sed -i 793c\\$HIGH settings/defaults/current.set
+    sed -i 792c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 793c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_set_Vds_hscale() {
-  LOW=$(sed -n 791p settings/defaults/current.set)
-  HIGH=$(sed -n 792p settings/defaults/current.set)
+  LOW=$(sed -n 791p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 792p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x03) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter H Scaling (0 - 1023)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x03) + ($HIGH & 0xfc) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 791c\\$LOW settings/defaults/current.set
-	  sed -i 792c\\$HIGH settings/defaults/current.set
+    sed -i 791c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 792c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
@@ -496,22 +496,22 @@ do_hv_scalling_menu() {
 #
 #
 do_sync_level() {
-  LOW=$(sed -n 830p settings/defaults/current.set)
-  HIGH=$(sed -n 831p settings/defaults/current.set)
+  LOW=$(sed -n 830p /home/$USER/gbs-control/settings/defaults/current.set)
+  HIGH=$(sed -n 831p /home/$USER/gbs-control/settings/defaults/current.set)
   CURRENT_VALUE=$(( (( $HIGH & 0x01) << 8) + $LOW ))
   NEW_VALUE=$(whiptail --inputbox "Enter Sync Level (0 - 511)" 20 60 "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
     HIGH=$(( ((NEW_VALUE >> 8) & 0x01) + ($HIGH & 0xfe) ))
 	  LOW=$((NEW_VALUE & 0xff))
-    sed -i 830c\\$LOW settings/defaults/current.set
-	  sed -i 831c\\$HIGH settings/defaults/current.set
+    sed -i 830c\\$LOW /home/$USER/gbs-control/settings/defaults/current.set
+	  sed -i 831c\\$HIGH /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 #
 #
 do_colour_enable() {
-  CURRENT_VALUE=$(( $(sed -n 831p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 831p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$(( (($CURRENT_VALUE >> 4) & 0x01) ))" -eq "1" ]; then
     DEFAULT_NO="--defaultno"
   else
@@ -523,15 +523,15 @@ do_colour_enable() {
   OFF=$(( $CURRENT_VALUE | 0x10 ))
   if [ $RET -eq 1 ]; then
     # NO / Disable Branch
-    sed -i 831c\\$OFF settings/defaults/current.set
+    sed -i 831c\\$OFF /home/$USER/gbs-control/settings/defaults/current.set
   elif [ $RET -eq 0 ]; then
     # YES / Enable Branch
-    sed -i 831c\\$ON settings/defaults/current.set
+    sed -i 831c\\$ON /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_colour_brightness() {
-  CURRENT_VALUE=$(( $(sed -n 827p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 827p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$CURRENT_VALUE" -ge 128 ]; then
     CURRENT_VALUE=$(( $CURRENT_VALUE - 256 ))
   fi
@@ -539,27 +539,27 @@ do_colour_brightness() {
   if [ $? -eq 0 ]; then
     if [ "$NEW_VALUE" -lt "0" ]; then
       NEW_VALUE=$(($NEW_VALUE + 256 ))
-      sed -i 827c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 827c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 827c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 827c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_contrast() {
-  CURRENT_VALUE=$(( $(sed -n 822p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 822p /home/$USER/gbs-control/settings/defaults/current.set) ))
   NEW_VALUE=$(whiptail --inputbox "Enter Y' Gain (0 to 255)" 20 60 -- "$CURRENT_VALUE" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    sed -i 822c\\$NEW_VALUE settings/defaults/current.set
+    sed -i 822c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
   fi
 }
 
 do_colour_u_gain() {
-  UCOS_VALUE=$(( $(sed -n 823p settings/defaults/current.set) ))
+  UCOS_VALUE=$(( $(sed -n 823p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$UCOS_VALUE" -ge 128 ]; then
     UCOS_VALUE=$(( $UCOS_VALUE - 256 ))
   fi
-  USIN_VALUE=$(( $(sed -n 825p settings/defaults/current.set) ))
+  USIN_VALUE=$(( $(sed -n 825p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$USIN_VALUE" -ge 128 ]; then
     USIN_VALUE=$(( $USIN_VALUE - 256 ))
   fi
@@ -575,25 +575,25 @@ do_colour_u_gain() {
     cd ..
     if [ "$UCOS_VALUE" -lt "0" ]; then
       UCOS_VALUE=$(($UCOS_VALUE + 256 ))
-      sed -i 823c\\$UCOS_VALUE settings/defaults/current.set
+      sed -i 823c\\$UCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 823c\\$UCOS_VALUE settings/defaults/current.set
+      sed -i 823c\\$UCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
     if [ "$USIN_VALUE" -lt "0" ]; then
       USIN_VALUE=$(($USIN_VALUE + 256 ))
-      sed -i 825c\\$USIN_VALUE settings/defaults/current.set
+      sed -i 825c\\$USIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 825c\\$USIN_VALUE settings/defaults/current.set
+      sed -i 825c\\$USIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_v_gain() {
-  VCOS_VALUE=$(( $(sed -n 824p settings/defaults/current.set) ))
+  VCOS_VALUE=$(( $(sed -n 824p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$VCOS_VALUE" -ge 128 ]; then
     VCOS_VALUE=$(( $VCOS_VALUE - 256 ))
   fi
-  VSIN_VALUE=$(( $(sed -n 826p settings/defaults/current.set) ))
+  VSIN_VALUE=$(( $(sed -n 826p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$VSIN_VALUE" -ge 128 ]; then
     VSIN_VALUE=$(( $VSIN_VALUE - 256 ))
   fi
@@ -609,33 +609,33 @@ do_colour_v_gain() {
     cd ..
     if [ "$VCOS_VALUE" -lt "0" ]; then
       VCOS_VALUE=$(($VCOS_VALUE + 256 ))
-      sed -i 824c\\$VCOS_VALUE settings/defaults/current.set
+      sed -i 824c\\$VCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 824c\\$VCOS_VALUE settings/defaults/current.set
+      sed -i 824c\\$VCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
     if [ "$VSIN_VALUE" -lt "0" ]; then
       VSIN_VALUE=$(($VSIN_VALUE + 256 ))
-      sed -i 826c\\$VSIN_VALUE settings/defaults/current.set
+      sed -i 826c\\$VSIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 826c\\$VSIN_VALUE settings/defaults/current.set
+      sed -i 826c\\$VSIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_hue() {
-  UCOS_VALUE=$(( $(sed -n 823p settings/defaults/current.set) ))
+  UCOS_VALUE=$(( $(sed -n 823p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$UCOS_VALUE" -ge 128 ]; then
     UCOS_VALUE=$(( $UCOS_VALUE - 256 ))
   fi
-  USIN_VALUE=$(( $(sed -n 825p settings/defaults/current.set) ))
+  USIN_VALUE=$(( $(sed -n 825p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$USIN_VALUE" -ge 128 ]; then
     USIN_VALUE=$(( $USIN_VALUE - 256 ))
   fi
-  VCOS_VALUE=$(( $(sed -n 824p settings/defaults/current.set) ))
+  VCOS_VALUE=$(( $(sed -n 824p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$VCOS_VALUE" -ge 128 ]; then
     VCOS_VALUE=$(( $VCOS_VALUE - 256 ))
   fi
-  VSIN_VALUE=$(( $(sed -n 826p settings/defaults/current.set) ))
+  VSIN_VALUE=$(( $(sed -n 826p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$VSIN_VALUE" -ge 128 ]; then
     VSIN_VALUE=$(( $VSIN_VALUE - 256 ))
   fi
@@ -654,27 +654,27 @@ do_colour_hue() {
     cd ..
     if [ "$UCOS_VALUE" -lt "0" ]; then
       UCOS_VALUE=$(($UCOS_VALUE + 256 ))
-      sed -i 823c\\$UCOS_VALUE settings/defaults/current.set
+      sed -i 823c\\$UCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 823c\\$UCOS_VALUE settings/defaults/current.set
+      sed -i 823c\\$UCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
     if [ "$USIN_VALUE" -lt "0" ]; then
       USIN_VALUE=$(($USIN_VALUE + 256 ))
-      sed -i 825c\\$USIN_VALUE settings/defaults/current.set
+      sed -i 825c\\$USIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 825c\\$USIN_VALUE settings/defaults/current.set
+      sed -i 825c\\$USIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
     if [ "$VCOS_VALUE" -lt "0" ]; then
       VCOS_VALUE=$(($VCOS_VALUE + 256 ))
-      sed -i 824c\\$VCOS_VALUE settings/defaults/current.set
+      sed -i 824c\\$VCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 824c\\$VCOS_VALUE settings/defaults/current.set
+      sed -i 824c\\$VCOS_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
     if [ "$VSIN_VALUE" -lt "0" ]; then
       VSIN_VALUE=$(($VSIN_VALUE + 256 ))
-      sed -i 826c\\$VSIN_VALUE settings/defaults/current.set
+      sed -i 826c\\$VSIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 826c\\$VSIN_VALUE settings/defaults/current.set
+      sed -i 826c\\$VSIN_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
@@ -711,7 +711,7 @@ do_colour_menu() {
 #
 #
 do_colour_u_cos_gain() {
-  CURRENT_VALUE=$(( $(sed -n 823p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 823p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$CURRENT_VALUE" -ge 128 ]; then
     CURRENT_VALUE=$(( $UCOS_VALUE - 256 ))
   fi
@@ -719,15 +719,15 @@ do_colour_u_cos_gain() {
   if [ $? -eq 0 ]; then
     if [ "$NEW_VALUE" -lt "0" ]; then
       NEW_VALUE=$(($NEW_VALUE + 256 ))
-      sed -i 823c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 823c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 823c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 823c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_v_cos_gain() {
-  CURRENT_VALUE=$(( $(sed -n 824p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 824p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$CURRENT_VALUE" -ge 128 ]; then
     CURRENT_VALUE=$(( $CURRENT_VALUE - 256 ))
   fi
@@ -735,15 +735,15 @@ do_colour_v_cos_gain() {
   if [ $? -eq 0 ]; then
     if [ "$NEW_VALUE" -lt "0" ]; then
       NEW_VALUE=$(($NEW_VALUE + 256 ))
-      sed -i 824c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 824c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 824c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 824c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_u_sin_gain() {
-  CURRENT_VALUE=$(( $(sed -n 825p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 825p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$CURRENT_VALUE" -ge 128 ]; then
     CURRENT_VALUE=$(( $CURRENT_VALUE - 256 ))
   fi
@@ -751,15 +751,15 @@ do_colour_u_sin_gain() {
   if [ $? -eq 0 ]; then
     if [ "$NEW_VALUE" -lt "0" ]; then
       NEW_VALUE=$(($NEW_VALUE + 256 ))
-      sed -i 825c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 825c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 825c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 825c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_v_sin_gain() {
-  CURRENT_VALUE=$(( $(sed -n 826p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 826p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$CURRENT_VALUE" -ge 128 ]; then
     CURRENT_VALUE=$(( $CURRENT_VALUE - 256 ))
   fi
@@ -767,15 +767,15 @@ do_colour_v_sin_gain() {
   if [ $? -eq 0 ]; then
     if [ "$NEW_VALUE" -lt "0" ]; then
       NEW_VALUE=$(($NEW_VALUE + 256 ))
-      sed -i 826c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 826c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 826c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 826c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_u_offset() {
-  CURRENT_VALUE=$(( $(sed -n 828p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 828p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$CURRENT_VALUE" -ge 128 ]; then
     CURRENT_VALUE=$(( $CURRENT_VALUE - 256 ))
   fi
@@ -783,15 +783,15 @@ do_colour_u_offset() {
   if [ $? -eq 0 ]; then
     if [ "$NEW_VALUE" -lt "0" ]; then
       NEW_VALUE=$(($NEW_VALUE + 256 ))
-      sed -i 828c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 828c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 828c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 828c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
 
 do_colour_v_offset() {
-  CURRENT_VALUE=$(( $(sed -n 829p settings/defaults/current.set) ))
+  CURRENT_VALUE=$(( $(sed -n 829p /home/$USER/gbs-control/settings/defaults/current.set) ))
   if [ "$CURRENT_VALUE" -ge 128 ]; then
     CURRENT_VALUE=$(( $CURRENT_VALUE - 256 ))
   fi
@@ -799,9 +799,9 @@ do_colour_v_offset() {
   if [ $? -eq 0 ]; then
     if [ "$NEW_VALUE" -lt "0" ]; then
       NEW_VALUE=$(($NEW_VALUE + 256 ))
-      sed -i 829c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 829c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     else
-      sed -i 829c\\$NEW_VALUE settings/defaults/current.set
+      sed -i 829c\\$NEW_VALUE /home/$USER/gbs-control/settings/defaults/current.set
     fi
   fi
 }
@@ -855,8 +855,8 @@ do_save() {
 
   NEW_VALUE=$(whiptail --inputbox "Enter Setting Name" 8 $WT_WIDTH "default" 3>&1 1>&2 2>&3)
   if [ $? -eq 0 ]; then
-    cp -f settings/defaults/current.set "settings/"$NEW_VALUE".set" >> log.txt 2>&1
-    cp -f settings/defaults/current.dei "settings/deinterlace/"$NEW_VALUE".dei" >> log.txt 2>&1
+    cp -f /home/$USER/gbs-control/settings/defaults/current.set "settings/"$NEW_VALUE".set" >> log.txt 2>&1
+    cp -f /home/$USER/gbs-control/settings/defaults/current.dei "settings/deinterlace/"$NEW_VALUE".dei" >> log.txt 2>&1
   fi
 }
 
@@ -870,10 +870,10 @@ do_nag() {
   if [ $RET -eq 1 ]; then
     return 0
   elif [ $RET -eq 0 ]; then
-	rm -f settings/$fileName >> log.txt 2>&1
+	rm -f /home/$USER/gbs-control/settings/$fileName >> log.txt 2>&1
 	LEN=$(( ${#fileName} - 4))
 	fileName=${fileName:0:LEN}".dei"
-	rm -f settings/deinterlace/$fileName >> log.txt 2>&1
+	rm -f /home/$USER/gbs-control/settings/deinterlace/$fileName >> log.txt 2>&1
   fi
 }
 
@@ -885,7 +885,7 @@ do_delete() {
   (find ./ -maxdepth 1 -type f -printf "%f\n" | sort) > defaults/fileList.txt
   cd ..
 
-  line_format settings/defaults/fileList.txt
+  line_format /home/$USER/gbs-control/settings/defaults/fileList.txt
   FUN=$(whiptail --title "Select Settings File to Delete" --menu "Settings Files" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Cancel --ok-button Select \
   $filesWhiptail \
   3>&1 1>&2 2>&3)
@@ -894,7 +894,7 @@ do_delete() {
     unset filesWhiptail
 	return 0
   elif [ $RET -eq 0 ]; then
-	fileName=$(sed -n $FUN'p' settings/defaults/fileList.txt)
+	fileName=$(sed -n $FUN'p' /home/$USER/gbs-control/settings/defaults/fileList.txt)
     do_nag
 	unset filesWhiptail
   fi
@@ -908,7 +908,7 @@ do_load() {
   (find ./ -maxdepth 1 -type f -printf "%f\n" | sort) > defaults/fileList.txt
   cd ..
 
-  line_format settings/defaults/fileList.txt
+  line_format /home/$USER/gbs-control/settings/defaults/fileList.txt
   FUN=$(whiptail --title "Select Settings File to Load" --menu "Settings Files" $WT_HEIGHT $WT_WIDTH $WT_MENU_HEIGHT --cancel-button Cancel --ok-button Select \
   $filesWhiptail \
   3>&1 1>&2 2>&3)
@@ -917,11 +917,11 @@ do_load() {
     unset filesWhiptail
     return 0
   elif [ $RET -eq 0 ]; then
-    fileName=$(sed -n $FUN'p' settings/defaults/fileList.txt)
-	cp -f settings/$fileName settings/defaults/current.set >> log.txt 2>&1
+    fileName=$(sed -n $FUN'p' /home/$USER/gbs-control/settings/defaults/fileList.txt)
+	cp -f /home/$USER/gbs-control/settings/$fileName /home/$USER/gbs-control/settings/defaults/current.set >> log.txt 2>&1
 	LEN=$(( ${#fileName} - 4))
 	fileName=${fileName:0:LEN}".dei"
-	cp -f settings/deinterlace/$fileName settings/defaults/current.dei >> log.txt 2>&1
+	cp -f /home/$USER/gbs-control/settings/deinterlace/$fileName /home/$USER/gbs-control/settings/defaults/current.dei >> log.txt 2>&1
   unset filesWhiptail
   fi
 }

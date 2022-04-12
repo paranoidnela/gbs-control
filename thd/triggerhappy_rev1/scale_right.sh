@@ -2,7 +2,7 @@
 
 # File adjust
 LOW=$(sed -n 791p /home/$USER/gbs-control/settings/defaults/current.set)
-HIGH=$(sed -n 792p settings/defaults/current.set)
+HIGH=$(sed -n 792p /home/$USER/gbs-control/settings/defaults/current.set)
 NEW_VALUE=$(( ( (( $HIGH & 0x03) << 8) + $LOW -1) ))
 HIGH=$(( ((NEW_VALUE >> 8) & 0x03) + ($HIGH & 0xfc) ))
 LOW=$((NEW_VALUE & 0xff))
