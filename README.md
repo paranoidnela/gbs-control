@@ -1,30 +1,25 @@
 gbs-control
 ===========
 
-Raspbian based Trueview5725 i2c controller
+RaspberryPi control interface that acts as i2c master to control the Trueview5725 in cheap scaler boards and allows running custom modes.
 
-Preliminary scripts for testing new custom settings on Trueview5725 based video processors.
-GBS8200, GBS8220, and maybe others in the future (HD Box Pro)
+Scripts for controlling and applying new custom settings on Trueview5725 based video processors such as the GBS8200, GBS8220, and maybe others in the future (HD Box Pro) using a Raspberry Pi.
 
-=============
-INSTALL GUIDE
+**INSTALL GUIDE**
 
 The install script is designed to be used with a fresh vanilla Raspbian Lite install, the new Raspbian images require the user to create their own accounts on first boot, the user can be named anything you want.
 to install or update run the following command (I highly reccomend to take a look at the script before blindly executing it):
 
 curl https://raw.githubusercontent.com/paranoidbashthot/gbs-control/master/install-gbs-control.sh | bash
 
-===============
-Usage
+**Usage**
 
-Raspberry Pi will auto boot into the config menu displayed via the Green RCA Luma input on the GBS board from Raspberry Pi composite output.
-The Raspberry Pi must be connected to the I2C lines (SDA, SCL and GND), of the target board.
-Also, the P8 jumper on the GBS82xx boards must be shorted to ensure RPi can be I2C master without interference.
-Global keyboard hotkeys are preconfigured to switch between the Config Menu and the RGB Video Source.
-Other tweaks can be make with the keyboard hotkeys.
+On the Raspberry Pi side: connect two wires on the composite out, connectthe three i2c wires to the GPIO pins, connect a keyboard(you can make a custom keypad) to usb and connect a power source.
+On the scaler side: bridge P8 (this will disable the stock control circuit), connect the composite out of the Pi to the Y RCA on the scaler (green jack), connect the i2c to the P5 connector on the scaler.
+RGBS (scart) to the scaler: the best solution is use the the header P11, R G and B are direct connections, CSync should go to a LM1881N but for testing I am skipping this and just pulling CSync down to ground with a 75ohm and connecting it to the scaler using a 470ohm which while not perfect is good enough for testing. NOTE: all video ground should be tied togheter using this method, you can get audio and connect it directly to the TV/converter/audio system.
+TODO: add pictures.
 
-================
-Hotkeys
+**Hotkeys**
 
 Navigation:
 
