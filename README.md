@@ -36,4 +36,9 @@ Here is a list of hotkeys, you can change them on the thd directory.
 - F5: Quick Save  
 - F7: Quick Load  
 - Grave or Tilde + (1, 2, 3, 4) Change the OSD output mode (I would stick to 2 and 4)  
-- CTRL + (1, 2, 3, 4, 5, 6, 7, 8) +Vertical Size(If Enabled), -Vertical Size(If Enabled), -Horizontal Size, +Horizontal Size, Picture Up, Picture Down, Picture Left, Picture Right.
+- CTRL + (1, 2, 3, 4, 5, 6, 7, 8) +Vertical Size(If Enabled), -Vertical Size(If Enabled), -Horizontal Size, +Horizontal Size, Picture Up, Picture Down, Picture Left, Picture Right.  
+
+**Project in Action**
+![OSD](./Pics/OSD.jpg)  
+![Demo1](./Pics/Demo1.jpg)  
+![Demo2](./Pics/Demo2.jpg)
