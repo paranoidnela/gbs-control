@@ -7,17 +7,17 @@ Scripts for controlling and applying new custom settings on Trueview5725 based v
 
 **INSTALL GUIDE**
 
-The install script is designed to be used with a fresh vanilla Raspbian Lite install, the new Raspbian images require the user to create their own accounts on first boot, the user can be named anything you want.
-to install or update run the following command (I highly reccomend to take a look at the script before blindly executing it):
+The install script is designed to be used with a fresh vanilla Raspbian Lite install, the new Raspbian images require the user to create their own accounts on first boot, the user can be named anything you want.  
+to install or update run the following command (I highly reccomend to take a look at the script before blindly executing it):  
 
-curl https://raw.githubusercontent.com/paranoidbashthot/gbs-control/master/install-gbs-control.sh | bash
+`curl https://raw.githubusercontent.com/paranoidbashthot/gbs-control/master/install-gbs-control.sh | bash`
 
 **Usage**
 
-On the Raspberry Pi side: connect two wires on the composite out, connectthe three i2c wires to the GPIO pins, connect a keyboard(you can make a custom keypad) to usb and connect a power source.
-On the scaler side: bridge P8 (this will disable the stock control circuit), connect the composite out of the Pi to the Y RCA on the scaler (green jack), connect the i2c to the P5 connector on the scaler.
-RGBS (scart) to the scaler: the best solution is use the the header P11, R G and B are direct connections, CSync should go to a LM1881N but for testing I am skipping this and just pulling CSync down to ground with a 75ohm and connecting it to the scaler using a 470ohm which while not perfect is good enough for testing. NOTE: all video ground should be tied togheter using this method, you can get audio and connect it directly to the TV/converter/audio system.
-TODO: add pictures.
+On the Raspberry Pi side: connect two wires on the composite out, connectthe three i2c wires to the GPIO pins, connect a keyboard(you can make a custom keypad) to usb and connect a power source.  
+On the scaler side: bridge P8 (this will disable the stock control circuit), connect the composite out of the Pi to the Y RCA on the scaler (green jack), connect the i2c to the P5 connector on the scaler.  
+RGBS (scart) to the scaler: the best solution is use the the header P11, R G and B are direct connections, CSync should go to a LM1881N but for testing I am skipping this and just pulling CSync down to ground with a 75ohm and connecting it to the scaler using a 470ohm which while not perfect is good enough for testing. NOTE: all video ground should be tied together using this method, you can get audio and connect it directly to the TV/converter/audio system.  
+TODO: add pictures.  
 
 **Hotkeys**
 
