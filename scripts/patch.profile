@@ -6,6 +6,7 @@
  fi
 +
 +DIR=$HOME"/gbs-control/"
++TERM=xterm-mono
 +python $DIR/scripts/rawProg.py $DIR/scripts/start.txt
 +python $DIR/scripts/regProg.py $DIR/settings/defaults/pi.set
 +bash $DIR/gbs-control.sh

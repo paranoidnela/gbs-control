@@ -15,11 +15,6 @@ cd $HOME
 rm -r gbs-control
 git clone https://github.com/paranoidbashthot/gbs-control.git
 
-# Patch /etc/inittab to allow for automatic login.
-# and to use xterm-mono for B&W (monochrome) interactive terminal.
-echo -e "\nApply patch to /etc/inittab for auto login and monochrome terminal:"
-sudo patch -bN -F 6 /etc/inittab $DIR/scripts/patch.inittab
-
 # Patch /etc/modules & /etc/modprobe.d/raspi-blacklist.conf for i2c use
 echo -e "\nApply patch to /etc/modules for kernal i2c modules:"
 sudo patch -bN -F 6 /etc/modules $DIR/scripts/patch.modules
