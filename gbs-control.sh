@@ -861,7 +861,7 @@ do_save() {
 }
 
 folder_settings () {
-  cd settings
+  cd  /home/$USER/gbs-control/settings/
 }
 
 do_nag() {
