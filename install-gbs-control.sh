@@ -13,13 +13,12 @@ sudo apt-get install -y i2c-tools libi2c-dev python3-smbus git
 echo -e "\nDownloading current master version:"
 cd $HOME
 rm -r gbs-control
-git clone https://github.com/paranoidbashthot/gbs-control.git
+git clone https://github.com/paranoidnela/gbs-control.git
+chmod +x $(find /home/$USER/gbs-control/ | grep "\.sh")
 
-# Patch /etc/modules & /etc/modprobe.d/raspi-blacklist.conf for i2c use
+# Patch /etc/modules for i2c use, blacklist is obsolete and config.txt seemingly gets auto patched
 echo -e "\nApply patch to /etc/modules for kernal i2c modules:"
 sudo patch -bN -F 6 /etc/modules $DIR/scripts/patch.modules
-echo -e "\nApply patch to /etc/modprobe.d/raspi-blacklist.conf to allow i2c use:"
-sudo patch -bN -F 6 /etc/modprobe.d/raspi-blacklist.conf $DIR/scripts/patch.raspi-blacklist.conf
 sudo usermod -aG i2c $USER
 
 # Patch /etc/default/triggerhappy to use current user
@@ -49,6 +48,8 @@ sudo mv installeduser /installeduser
 # Add required scripts for automatic start-up.
 echo -e "\nApply patch to .profile for bootup scripts:"
 patch -bN -F 6 $HOME/.profile $DIR/scripts/patch.profile
+cat $DIR/scripts/override.conf > /etc/systemd/system/getty@tty1.service.d/override.conf
+echo "ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin $USER %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/override.conf
 
 # Replace config.txt to ensure booting with composite.
 echo -e "\nReplace /boot/config.txt for Luma output settings:"

@@ -27,7 +27,7 @@ Full instructions are present on [BUILDINGHW.md](./BUILDINGHW.md)
 **How do I install the Raspberry Pi software?**  
 - DD a Raspberry Pi OS Lite image to your SD Card and do the first time setup (you are now required to make your own user and choose your own password)  
 - Connect the Pi to the internet  
-- run `curl https://raw.githubusercontent.com/paranoidbashthot/gbs-control/master/install-gbs-control.sh | bash` (I highly reccomend to take a look at the script before blindly executing it, it should be fine rerunning the command if you want to update the Pi)  
+- run `curl https://raw.githubusercontent.com/paranoidnela/gbs-control/master/install-gbs-control.sh | bash` (I highly reccomend to take a look at the script before blindly executing it, it should be fine rerunning the command if you want to update the Pi)  
 
 **Hotkeys**  
 Here is a list of hotkeys, you can change them on the thd directory.  
