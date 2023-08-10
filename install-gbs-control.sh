@@ -48,8 +48,8 @@ sudo mv installeduser /installeduser
 # Add required scripts for automatic start-up.
 echo -e "\nApply patch to .profile for bootup scripts:"
 patch -bN -F 6 $HOME/.profile $DIR/scripts/patch.profile
-cat $DIR/scripts/override.conf > /etc/systemd/system/getty@tty1.service.d/override.conf
-echo "ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin $USER %I \$TERM" >> /etc/systemd/system/getty@tty1.service.d/override.conf
+cp -r $DIR/scripts/override.conf /etc/systemd/system/getty@tty1.service.d/override.conf
+echo "ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --autologin $USER %I \$TERM" | sudo tee -a /etc/systemd/system/getty@tty1.service.d/override.conf
 
 # Replace config.txt to ensure booting with composite.
 echo -e "\nReplace /boot/config.txt for Luma output settings:"
