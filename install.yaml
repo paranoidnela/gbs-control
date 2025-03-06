@@ -1,0 +1,192 @@
+- name: Deploy gbs-control to Pi
+  hosts: all
+  become: true
+
+  tasks:
+  - name: Add the group 'gbs'
+    group:
+      name: gbs
+      state: present
+
+  - name: Add the user 'gbs'
+    ansible.builtin.user:
+      name: gbs
+      groups:
+        - gbs
+        - i2c
+      home: /home/gbs
+      create_home: yes
+      append: yes
+    become: yes
+
+  - name: Create .profile for user 'gbs' if it doesn't already exit
+    ansible.builtin.file:
+      path: /home/gbs/.profile
+      state: touch
+      owner: gbs
+      group: gbs
+      mode: 0755
+    become: yes
+
+  - name: Upgrade all apt packages
+    apt:
+      force_apt_get: yes
+      upgrade: dist
+    become: yes
+
+  - name: Install dependencies
+    apt:
+      name:
+        - i2c-tools
+        - libi2c-dev
+        - python3-smbus
+        - git
+      state: present
+      update_cache: true
+
+  - name: Create Directory /opt/gbs-control
+    file:
+      path: /opt/gbs-control
+      state: directory
+      mode: 0755
+      owner: gbs
+      group: gbs
+    become: yes
+
+  - name: Example clone of a single branch
+    ansible.builtin.git:
+      repo: https://github.com/paranoidnela/gbs-control.git
+      dest: /opt/gbs-control
+
+#TODO: find a more ansible native way to do this
+  - name: Make all .sh files in /opt/gbs-control executable
+    shell: 'chmod +x $(find /opt/gbs-control/ | grep "\.sh")'
+    become: yes
+
+  - name: Add i2c modules to /etc/modules
+    blockinfile: 
+      state: present
+      insertafter: EOF
+      dest: /etc/modules
+      marker: "<!-- add services ANSIBLE MANAGED BLOCK -->"
+      content: |
+        i2c-bcm2708
+        i2c-dev
+
+  - name: Change the user triggerhappy should run as
+    ansible.builtin.replace:
+      path: /etc/default/triggerhappy
+      regexp: '^.*DAEMON_OPTS=.*$'
+      replace: 'DAEMON_OPTS="--user gbs'
+    become: yes
+
+#this is a port of these lines below, it probably is broken already, I have no clue
+# This is necessary because of a "bug" where the defaults config gets ignored, it might cause issues in the future
+#sudo sed -i 's/^.*--user.*$/ExecStart=\/usr\/sbin\/thd --triggers \/etc\/triggerhappy\/triggers.d\/ --socket \/run\/thd.socket --user '$USER' --deviceglob \/dev\/input\/event*/' /lib/systemd/system/triggerhappy.service
+
+  - name: Edit triggerhappy systemd service to run as gbs manually because /etc/default/ entry gets ignored
+    ansible.builtin.replace:
+      path: /lib/systemd/system/triggerhappy.service
+      regexp: '^.*--user.*$'
+      replace: 'ExecStart=\/usr\/sbin\/thd --triggers \/etc\/triggerhappy\/triggers.d\/ --socket \/run\/thd.socket --user gbs --deviceglob \/dev\/input\/event*/'
+    become: yes
+
+#TODO: this sucks, fix it
+  - name: Get Pi revision
+    shell: 'REVISION=$(cat /proc/cpuinfo | grep Revision) && LEN=${{ "{" }}{{ "#" }}REVISION} && POS=$((LEN -4)) && REV=${REVISION:POS} echo $REV'
+    register: pi_revision
+
+  - name: Set Rev1 flag
+    set_fact:
+      rev1: True
+    when: (pi_revision.stdout == "Beta") or
+          (pi_revision.stdout == "0002") or
+          (pi_revision.stdout == "0003")
+
+  - name: Copy triggerhappy hotkey config files for Rev1 Pi
+    ansible.builtin.copy:
+      src: /opt/gbs-control/thd/triggerhappy_rev1
+      dest: /etc/triggerhappy/triggers.d/
+    become: yes
+    when: rev1
+
+  - name: Fix smbus for Rev1 Pi
+    ansible.builtin.replace:
+      path: /opt/gbs-control/scripts/Adafruit_I2C.py
+      regexp: '    self.bus = smbus.SMBus(1)'
+      replace: '    self.bus = smbus.SMBus(0)'
+    become: yes
+    when: rev1
+
+  - name: Copy triggerhappy hotkey config files for non Rev1 Pi
+    ansible.builtin.copy:
+      src: /opt/gbs-control/thd/triggerhappy
+      dest: /etc/triggerhappy/triggers.d/
+    become: yes
+    when: not rev1
+
+  - name: Enable the triggerhappy service
+    systemd: 
+      daemon_reload: yes
+      name: triggerhappy
+      enabled: yes
+    become: yes
+
+  - name: Add gbs-control to .profile file
+    blockinfile: 
+      state: present
+      insertafter: EOF
+      dest: /home/gbs/.profile
+      marker: "<!-- add services ANSIBLE MANAGED BLOCK -->"
+      content: |
+        DIR="/opt/gbs-control/"
+        TERM=xterm-mono
+        python $DIR/scripts/rawProg.py $DIR/scripts/start.txt
+        python $DIR/scripts/regProg.py $DIR/settings/defaults/pi.set
+        bash $DIR/gbs-control.sh
+
+  - name: Enable autologin for user 'gbs' in tty1
+    ansible.builtin.copy:
+      src: /opt/gbs-control/scripts/override.conf
+      dest: /etc/systemd/system/getty@tty1.service.d/override.conf
+    become: yes
+
+  - name: Create backup /boot/config.txt before altering it
+    ansible.builtin.copy:
+      src: /boot/config.txt
+      dest: /boot/config.txt.bak
+    become: yes
+
+  - name: Delete /boot/config.txt to deploy gbs-control version of file
+    ansible.builtin.file:
+      state: absent
+      path: /boot/config.txt
+    become: yes
+
+#TODO: this sucks, fix it
+  - name: Check if device tree is used
+    shell: 'DEVTREE=$(ls /proc | grep -c device-tree) echo $DEVTREE'
+    register: devtree_present
+
+  - name: Set device tree flag
+    set_fact:
+      devtreeispresent: True
+    when: devtree_present.stdout != "0"
+
+  - name: Deploy device tree config.txt
+    ansible.builtin.copy:
+      src: /opt/gbs-control/scripts/config-device-tree.txt
+      dest: /boot/config.txt
+    become: yes
+    when: devtreeispresent
+
+  - name: Deploy non device tree config.txt
+    ansible.builtin.copy:
+      src: /opt/gbs-control/scripts/config.txt
+      dest: /boot/config.txt
+    become: yes
+    when: not devtreeispresent
+
+  - name: Reboot Pi to apply all settings
+    ansible.builtin.reboot:
+    become: yes
